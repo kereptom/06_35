@@ -133,6 +133,11 @@ export default function Wheel() {
     return () => el.removeEventListener("wheel", handleWheel);
   }, [snapTo, animateSnap]);
 
+  const goNext = useCallback(() => {
+    if (rafRef.current) cancelAnimationFrame(rafRef.current);
+    animateSnap(snapTo(offsetRef.current + ITEM_HEIGHT));
+  }, [snapTo, animateSnap]);
+
   // Keyboard
   useEffect(() => {
     const handleKey = (e: KeyboardEvent) => {
@@ -142,13 +147,12 @@ export default function Wheel() {
         animateSnap(snapTo(offsetRef.current - ITEM_HEIGHT));
       } else if (e.key === "ArrowDown" || e.key === "ArrowRight") {
         e.preventDefault();
-        if (rafRef.current) cancelAnimationFrame(rafRef.current);
-        animateSnap(snapTo(offsetRef.current + ITEM_HEIGHT));
+        goNext();
       }
     };
     window.addEventListener("keydown", handleKey);
     return () => window.removeEventListener("keydown", handleKey);
-  }, [snapTo, animateSnap]);
+  }, [snapTo, animateSnap, goNext]);
 
   // Cleanup
   useEffect(() => {
@@ -281,9 +285,17 @@ export default function Wheel() {
         {String(currentIndex + 1).padStart(3, "0")} / {String(COUNT).padStart(3, "0")}
       </span>
 
+      {/* Next button */}
+      <button
+        onClick={goNext}
+        className="mt-6 px-6 py-2.5 text-[13px] font-medium tracking-wide text-zinc-500 border border-zinc-200 rounded-full hover:text-zinc-800 hover:border-zinc-400 active:scale-95 transition-all duration-150"
+      >
+        Next →
+      </button>
+
       {/* Hint */}
-      <p className="mt-6 text-[10px] text-zinc-300 tracking-widest uppercase">
-        drag to explore
+      <p className="mt-4 text-[10px] text-zinc-300 tracking-widest uppercase">
+        or drag to explore
       </p>
     </div>
   );
